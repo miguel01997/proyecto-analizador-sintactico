@@ -60,7 +60,7 @@ public class AnalizSint
 			 // Estado Aceptador.
 			 TokenActual = null;
 			}
-		 else throw new Exception("ERROR: Se esperaba un identificador");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 	 }
 	 
 	 
@@ -116,9 +116,9 @@ public class AnalizSint
 				  TokenActual = null;
 				  // Estado Aceptador. 
 			 	}
-			 else throw new Exception("ERROR: Se esperaba un )");
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )");
 		 	}
-		 else throw new Exception("ERROR: Se esperaba un (");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un (");
 		 
 	 }
 	 
@@ -280,7 +280,7 @@ public class AnalizSint
 			 TokenActual = null;
 			 // Estado Aceptador.
 		 }
-		 else throw new Exception("ERROR: Se esperaba un tipo primitivo");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un tipo primitivo");
 	 }
 	 
 	 
@@ -426,15 +426,17 @@ public class AnalizSint
 		 	{
 		 		TokenActual = null;
 		 		ListaStatement();
-		 		 if (TokenActual == null)  
+		 		if (TokenActual == null)  
 						TokenActual = Lex.GetToken();
 				 
-				 	if (TokenActual.Token.compareTo("<}>") == 0)
+		 		if (TokenActual.Token.compareTo("<}>") == 0)
 				 	{
 				 		TokenActual = null;
 				 		// Estado Aceptador;
 				 	}
+		 		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un }");
 		 	}
+		 	else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una {");
 		 
 		 
 	 }
@@ -475,10 +477,9 @@ public class AnalizSint
 	 
 	 
 	 
-	 // Field ::= Type VarDeclaratorList <;>
+	 // Field ::= VarDeclaratorList <;>
 	 private void Field() throws Exception
 	 {
-		// Type();
 		 VarDeclaratorList();
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
@@ -489,12 +490,20 @@ public class AnalizSint
 		 		// Estado Aceptador.
 		 		
 		 	}
-		 else throw new Exception("ERROR: Se esperaba un ;");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
 	 }
 	 
 	 
 	 
-	 // PreAnalisis_Field_Method_Cont2 ::=  Field PreAnalisis_Field_Ctor_Method |  Method ListaMethod
+	 
+	 // MethodSinTypeSinID ::= FormalArgs Block
+	 private void MethodSinTypeSinID() throws Exception
+	 {
+		 FormalArgs();
+		 Block();
+	 }
+	 
+	 // PreAnalisis_Field_Method_Cont2 ::=  Field PreAnalisis_Field_Ctor_Method |  MethodSinTypeSinID ListaMethod
 	 
 	 private void PreAnalisis_Field_Method_Cont2() throws Exception
 	 {
@@ -509,7 +518,7 @@ public class AnalizSint
 		 	}
 		 	else if (TokenActual.Token.compareTo("<(>") == 0)
 		 			{
-		 				Method();
+		 				MethodSinTypeSinID();
 		 				ListaMethod();
 		 			}
 		 
@@ -539,17 +548,18 @@ public class AnalizSint
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
 		 
-		 	if (TokenActual.Token.compareTo("<Identificador>") == 0)
+		 if (TokenActual.Token.compareTo("<Identificador>") == 0)
 		 	{
 		 		TokenActual = null;
 		 		PreAnalisis_Field_Method_Cont2();
 		 	}
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador"); 
 		 
 	 }
 	 
 	  
 	 
-	 // CtorSinID :==  FormalArgs Block PreAnalisis_Ctor_Method | <vacio>
+	 // CtorSinID :==  FormalArgs Block | <vacio>
 	 private void CtorSinID() throws Exception
 	 {
 		 if (TokenActual == null)  
@@ -559,7 +569,6 @@ public class AnalizSint
 			 {
 			 FormalArgs();
 			 Block();
-			 PreAnalisis_Ctor_Method();
 			 }
 		 // Sino CtorSinID :== <vacio>
 	 }
@@ -567,7 +576,7 @@ public class AnalizSint
 	 
 	 
 	 
-	 // PreAnalisis_Ctor_Method_Cont ::= CtorSinID | <identifier> FormalArgs Block ListaMethod 
+	 // PreAnalisis_Ctor_Method_Cont ::= CtorSinID PreAnalisis_Ctor_Method  | <identifier> FormalArgs Block ListaMethod 
 	 private void PreAnalisis_Ctor_Method_Cont() throws Exception
 	 {
 		 if (TokenActual == null)  
@@ -576,6 +585,7 @@ public class AnalizSint
 		 if (TokenActual.Token.compareTo("<(>") == 0)
 			 {
 			 	CtorSinID();
+			 	PreAnalisis_Ctor_Method();
 			 }
 		 else {
 			 	if (TokenActual == null)  
@@ -583,10 +593,13 @@ public class AnalizSint
 			 
 			 	if (TokenActual.Token.compareTo("<Identificador>") == 0)
 			 		{
+			 			TokenActual = null;  
 			 			FormalArgs();
 			 			Block();
 			 			ListaMethod();
 			 		}
+			 	else throw new Exception("Lineas " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
+			 		
 		 	   }
 	 }
 	 
@@ -606,6 +619,7 @@ public class AnalizSint
 			 FormalArgs();
 			 Block();
 		 	}
+		 else throw new Exception("Lineas " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 	  }
 	 
 	 
@@ -619,9 +633,11 @@ public class AnalizSint
 		 
 		 if (TokenActual.Token.compareTo("<Identificador>") == 0)
 		 	{
+			 TokenActual = null;  
 			 FormalArgs();
 			 Block();
 		 	}
+		 else throw new Exception("Lineas " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 	 }
 	   
 	 
@@ -651,6 +667,7 @@ public class AnalizSint
 		 
 		 if (TokenActual.Token.compareTo("<Identificador>") == 0)
 		 	{
+			 TokenActual = null;
 			 PreAnalisis_Ctor_Method_Cont(); 
 			 
 		 	}
@@ -691,7 +708,7 @@ public class AnalizSint
 	 
 	 
 	 
-	 // PreAnalisis_Field_Ctor_Method ::= <Identificador> PreAnalisis_Field_Ctor_Method_Cont | <void> Method ListaMethod | PreAnalisis_Field_Method_Cont
+	 // PreAnalisis_Field_Ctor_Method ::= <Identificador> PreAnalisis_Field_Ctor_Method_Cont | <void> Method ListaMethod | PreAnalisis_Field_Method_Cont | <vacio>
 	 private void PreAnalisis_Field_Ctor_Method() throws Exception
 	 {
 		 if (TokenActual == null)  
@@ -713,6 +730,7 @@ public class AnalizSint
 		 		  		TokenActual = null;	
 		 		  		PreAnalisis_Field_Method_Cont();
 		 	  		  }
+		 	  	   // Sino  PreAnalisis_Field_Ctor_Method ::= <vacio>
 		 
 	 }
 	 
@@ -748,13 +766,14 @@ public class AnalizSint
 				 				TokenActual = null;
 				 				// Estado Aceptador.
 				 			}
-				 		else throw new Exception("ERROR: Se esperaba una } ");
+				 		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una } ");
 				 	  }
-				 	 else throw new Exception("ERROR: Se esperaba una { ");
+				 	 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una { ");
 			 	}
-			 else throw new Exception("ERROR: Se esperaba un identificador");
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 			}
-		 else throw new Exception("ERROR: Se esperaba por lo menos un class");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba por lo menos un class");
+		 
 	 }
 	 
  
