@@ -20,7 +20,7 @@ public class AnalizSint
      }
 	 
 	 
-	 // Super ::= extends identifier
+	 // Super ::= Super ::= <extends> <identifier>
 	 private void Super() throws Exception
 	 {
 		if (TokenActual.Token.compareTo("<extends>") == 0) 
@@ -405,14 +405,327 @@ public class AnalizSint
 	 }
 	 
 	 
-	 
-	 // ListaStatement ::= Statement ListaStatement | <vacio>
-	 private void ListaStatement()
+	 // BinaryOpPrecedence1 ::=  <Multiplicacion> | </> | <Modulo>
+	 private void BinaryOpPrecedence1() throws Exception
 	 {
-		 //Statement();
-		// ListaStatement();
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<Multiplicacion>") == 0)||(TokenActual.Token.compareTo("</>") == 0)||(TokenActual.Token.compareTo("<Modulo>") == 0))
+		 {
+			 
+		 }
+				 
+	 }
+	 
+	 
+	 // E7 ::=  ExpressionUnary | Primary
+	 private void E7() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<!>") == 0)|| (TokenActual.Token.compareTo("<Suma>") == 0)|| (TokenActual.Token.compareTo("<Resta>") == 0))
+			 ExpressionUnary();
+		 else if ((TokenActual.Token.compareTo("<Idetificador>")==0) || (TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0)|| (TokenActual.Token.compareTo("<this>")==0)|| (TokenActual.Token.compareTo("<.>")==0)||(TokenActual.Token.compareTo("<(>")==0)|| (TokenActual.Token.compareTo("<new>")==0)||(TokenActual.Token.compareTo("<super>")==0))
+			 	Primary();
+		 	  else throw new Exception("ERROR: Se esperaba un simbolo de expresion unaria o uno primario");
+	 }
+	 
+	 
+	 
+	 // E6’ ::= BinaryOpPrecedence1 E7 E6’
+	 private void E6Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<*>") == 0)|| (TokenActual.Token.compareTo("</>") == 0)||(TokenActual.Token.compareTo("<Modulo>") == 0))
+		 	{
+			 BinaryOpPrecedence1();
+			 E7(); 
+			 E6Prima();
+		 	}
+		 // Sino E1’ ::= <vacio>
+	 }
+	 
+	 
+	 
+	 
+	 // E6 ::= E7 E6’
+	 private void E6()
+	 {
+		E7();
+		E6Prima();
+	 }
+	 
+	  
+	 // E5’ ::= BinaryOpPrecedence2 E6 E5’ | <vacio>
+	 private void E5Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<+>") == 0)|| (TokenActual.Token.compareTo("<->") == 0))
+		 	{
+			 BinaryOpPrecedence2();
+			 E6(); 
+			 E5Prima();
+		 	}
+		 // Sino E1’ ::= <vacio>
+	 }
+	 
+	 // E5 ::= E6 E5’
+	 private void E5()
+	 {
+		E6();
+		E5Prima();
+	 }
+	 
+	 
+	 
+	 // E4 :: = E5 BinaryOpPrecedence3 E5 | E5
+	 private void E4() throws Exception
+	 {
+		 E5();
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<<>") == 0)|| (TokenActual.Token.compareTo("<>>") == 0)|| (TokenActual.Token.compareTo("<<=>") == 0)|| (TokenActual.Token.compareTo("<>=>") == 0))
+		 	{
+			 BinaryOpPrecedence3();
+			 E5();
+		 	}
+
+	 }
+	 
+	 
+	 
+	 
+	 // E3’ ::= BinaryOpPrecedence4 E4 E3’ | <vacio>
+	 private void E3Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<==>") == 0)|| (TokenActual.Token.compareTo("<!=>") == 0))
+		 	{
+			 BinaryOpPrecedence4();
+			 E4(); 
+			 E3Prima();
+		 	}
+		 // Sino E1’ ::= <vacio>
+	 }
+	 
+	 
+	 //  E3 ::= E4 E3’
+	 private void E3()
+	 {
+		E4();
+		E3Prima();
+	 }
+	 
+	 
+	 
+	 
+	 // E2’ ::= <And> E3 E2’ | <vacio>
+	 private void E2Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<And>") == 0)
+		 	{
+			 E3(); 
+			 E2Prima();
+		 	}
+		 // Sino E1’ ::= <vacio>
+	 }
+	 
+	 
+	 //  E2 ::= E3 E2’
+	 private void E2()
+	 {
+		E3();
+		E2Prima();
+	 }
+	 
+	 // E1’ ::= <OR> E2 E1’| <vacio>
+	 private void E1Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<OR>") == 0)
+		 	{
+			 E2(); 
+			 E1Prima();
+		 	}
+		 // Sino E1’ ::= <vacio>
+	 }
+	 
+	 
+	 
+	// E1 ::= E2 E1’
+	 private void E1()
+	 {
+		 E2();
+		 E1Prima();
+	 }
+	 
+	 
+	 
+	 // Expression ::= E1 <Operador Asignación> Expression | E1
+	 private void Expression()
+	 {
+		 E1();
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<Operador Asignación>")==0)
+			{
+			 	TokenActual = null;
+			 	Expression();
+			}
+	 }
+	 
+	 
+	 
+	 
+	 // ExpressionOpcional ::= Expression | <vacio>
+	 private void ExpressionOpcional() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<!>")==0) || (TokenActual.Token.compareTo("<Suma>")==0) || (TokenActual.Token.compareTo("<Resta>")==0) || (TokenActual.Token.compareTo("<Idetificador>")==0) || (TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0)|| (TokenActual.Token.compareTo("<this>")==0)|| (TokenActual.Token.compareTo("<.>")==0)||(TokenActual.Token.compareTo("<(>")==0)|| (TokenActual.Token.compareTo("<new>")==0)||(TokenActual.Token.compareTo("<super>")==0))  
+			 Expression();
+		 // Sino ExpressionOpcional ::= <vacio>
+	 }
+
+	 
+	 // StatementCont ::= <else> Statement | <vacio>
+	 private void StatementCont() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<else>")==0)
+		 	{
+			 	TokenActual = null;
+			 	Statement();
+		 	}
+		 // Sino  StatementCont ::= <vacio>
+	 }
+	 
+	  
+	 
+	 
+	 // Statement ::= <;> | <if> <(> Expression <)> Statement StatementCont | <return> ExpressionOpcional <;> | Block | <for> <(> Expression <;> Expression <;> Expression <)> Statement |  <while> <(> Expression <)> Statement
+	 private void Statement() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<;>")==0)
+				 {
+			 	  TokenActual =null;
+			 	  // Estado Aceptador.
+				 }
+		 else if (TokenActual.Token.compareTo("<if>")==0)
+				 {
+  				  TokenActual = Lex.GetToken();
+			 	  if (TokenActual.Token.compareTo("<(>")==0)
+			 		{
+			 		    TokenActual =null;
+			 		  	Expression();
+			 		  	if (TokenActual == null)  
+							TokenActual = Lex.GetToken();
+			 		  	if (TokenActual.Token.compareTo("<)>")== 0 )
+			 		  		{
+			 		  			TokenActual =null;
+			 		  			Statement();
+			 		  			StatementCont();
+			 		  		}
+			 		  	else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )");
+			 		}
+			 	 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un (");
+				 }
+		 	  else if (TokenActual.Token.compareTo("<return>")== 0 )
+		 			  {
+		 		  		TokenActual =null;
+		 		  		ExpressionOpcional(); 
+		 		  		if (TokenActual == null)  
+							TokenActual = Lex.GetToken();
+		 		  		if (TokenActual.Token.compareTo("<;>")== 0 )
+		 		  			{
+		 		  				TokenActual =null;
+		 		  				// Estado Aceptador.
+		 		  			}
+		 		  		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
+		 			  }
+		 	  	  else  if (TokenActual.Token.compareTo("<{>") == 0) 
+						 	Block();
+		 	  	  		else // <for> <(> Expression <;> Expression <;> Expression <)> Statement 
+		 	  	  			if (TokenActual.Token.compareTo("<for>") == 0)
+		 	  	  				{
+		 	  	  				  TokenActual = Lex.GetToken();
+		 	  	  				  if (TokenActual.Token.compareTo("<(>")==0)
+		 	  	  				  	{
+		 	  	  					  TokenActual =null;
+		 	  	  					  Expression();
+		 	  	  					  if (TokenActual == null)  
+		 	  	  						  TokenActual = Lex.GetToken();
+		 	  	  					  if (TokenActual.Token.compareTo("<;>")== 0 )
+		 	  	  					  	{
+		 	  	  						  TokenActual =null;
+		 	  	  						  Expression();
+		 	  	  						  if (TokenActual == null)  
+		 	  	  							  TokenActual = Lex.GetToken();
+		 	  	  						  if (TokenActual.Token.compareTo("<;>")== 0 )
+		 	  	  						  	{
+		 	  	  							  TokenActual =null;
+				 	  	  					  Expression();
+				 	  	  					  if (TokenActual == null)  
+				 	  	  						  TokenActual = Lex.GetToken();
+				 	  	  					  if (TokenActual.Token.compareTo("<)>")== 0 )
+				 	  	  					  	{
+				 	  	  						  TokenActual =null;
+				 	  	  						  Statement();
+				 	  	  					  	}
+				 	  	  					  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )");
+				 	  	  					 }
+		 	  	  						  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
+		 	  	  						 }
+		 	  	  					 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
+		 	  	  				  	}
+		 	  	  				  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un (");
+		 	  	  				}
+		 	  	  			else // <while> <(> Expression <)> Statement
+	 	 						if (TokenActual.Token.compareTo("while") == 0)
+	 	 							{
+	 	 							  TokenActual = Lex.GetToken();
+	 	 							  if (TokenActual.Token.compareTo("<(>")==0)
+	 	 							  	{
+	 	 								  TokenActual =null;
+		 	  	  						  Expression();
+		 	  	  						  if (TokenActual == null)  
+		 	  	  							  TokenActual = Lex.GetToken();
+		 	  	  						  if (TokenActual.Token.compareTo("<)>")== 0 )
+		 	  	  						  	 {	
+		 	  	  							   TokenActual =null;
+		 	  	  							   Statement();
+		 	  	  						  	 }
+		 	  	  						  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )");
+	 	 								  	
+	 	 							  	}
+	 	 							  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un (");
+	 	 							}
+	 }
+	 // ListaStatement ::= Statement ListaStatement | <vacio>
+	 private void ListaStatement() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
 		 
-		 
+		 if ((TokenActual.Token.compareTo("<;>") == 0)|| (TokenActual.Token.compareTo("<if>") == 0)|| (TokenActual.Token.compareTo("<return>") == 0) || (TokenActual.Token.compareTo("<for>") == 0)|| (TokenActual.Token.compareTo("<while>") == 0))
+		 	{
+			 Statement();
+			 ListaStatement();
+		 	}
+		 else if (TokenActual.Token.compareTo("<{>") == 0) 
+				 Block();
+		 	  
+		 	  // Sino ListaStatement ::= <vacio>
+
 	 }
 	  
 		 
@@ -521,6 +834,7 @@ public class AnalizSint
 		 				MethodSinTypeSinID();
 		 				ListaMethod();
 		 			}
+		 		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una , o un (");
 		 
 	 }
 	 
@@ -675,21 +989,7 @@ public class AnalizSint
 		 
 	 }
 	 
-	 
-	 // Ctor ::= <identifier> FormalArgs Block
-	 private void Ctor() throws Exception
-	 {
-		 if (TokenActual == null)  
-				TokenActual = Lex.GetToken();
-		 
-		 if (TokenActual.Token.compareTo("<Identificador>") == 0)
-			 {
-			 	FormalArgs();
-			 	Block();
-			 }
-		 
-	 }
-	 
+ 
 	 // PreAnalisis_Field_Ctor_Method_Cont ::= CtorSinID  PreAnalisis_Ctor_Method | PreAnalisis_Field_Method_Cont
 	 private void PreAnalisis_Field_Ctor_Method_Cont() throws Exception
 	 {
