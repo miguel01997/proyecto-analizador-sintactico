@@ -405,6 +405,92 @@ public class AnalizSint
 	 }
 	 
 	 
+	 
+	 // NewExpr ::= Literal
+	 
+	 
+	 // ExpressionUnary :: = UnaryOp Expression
+	 private void ExpressionUnary() throws Exception
+	 {
+		 UnaryOp();
+		 Expression();
+	 }
+	 
+	 
+	 // Primary ::= <identifier> | NewExpr
+	 private void Primary() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<identifier>") == 0)
+		 {
+			 TokenActual = null;
+			 // Estado Aceptador.
+		 }
+		 else NewExpr();	 
+	 }
+	 
+	 
+	 // UnaryOp ::= <!> | <Suma> | <Resta>
+	 private void UnaryOp() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<!>") == 0)||(TokenActual.Token.compareTo("<Suma>") == 0)||(TokenActual.Token.compareTo("<Resta>") == 0))
+		 {
+			 TokenActual = null;
+			 // Estado Aceptador.
+		 }
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un operador ! o uno de suma o resta ");	 
+	 }
+	 
+	 
+	 
+	 // BinaryOpPrecedence4 ::= <Operador Igualdad> | <!=>
+	 private void BinaryOpPrecedence4() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<Operador Igualdad>") == 0)||(TokenActual.Token.compareTo("<!=>") == 0))
+		 {
+			 TokenActual = null;
+			 // Estado Aceptador.
+		 }
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un operador de igualdad o un != ");	 
+	 }
+	 
+	 
+	 // BinaryOpPrecedence3 ::= <<> | <>> |  <<=> | <>=>
+	 private void BinaryOpPrecedence3() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<<>") == 0)||(TokenActual.Token.compareTo("<>>") == 0)||(TokenActual.Token.compareTo("<<=>") == 0)||(TokenActual.Token.compareTo("<>=>") == 0))
+		 {
+			 TokenActual = null;
+			 // Estado Aceptador.
+		 }
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un simbolo > o < o <= o >= ");	 
+	 }
+	 
+	 
+	 
+	 // BinaryOpPrecedence2 ::= <Suma> | <Resta>
+	 private void BinaryOpPrecedence2() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<Suma>") == 0)||(TokenActual.Token.compareTo("<Resta>")==0))
+		 {
+			 TokenActual = null;
+			 // Estado Aceptador.
+		 }
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un simbolo de suma o resta");
+		 	 
+	 }
+	 
+	 
+	 
 	 // BinaryOpPrecedence1 ::=  <Multiplicacion> | </> | <Modulo>
 	 private void BinaryOpPrecedence1() throws Exception
 	 {
@@ -412,10 +498,14 @@ public class AnalizSint
 				TokenActual = Lex.GetToken();
 		 if ((TokenActual.Token.compareTo("<Multiplicacion>") == 0)||(TokenActual.Token.compareTo("</>") == 0)||(TokenActual.Token.compareTo("<Modulo>") == 0))
 		 {
-			 
+			 TokenActual = null;
+			 // Estado Aceptador.
 		 }
-				 
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un simbolo de multiplicacion, division o modulo");
+		 	 
 	 }
+	 
+	 
 	 
 	 
 	 // E7 ::=  ExpressionUnary | Primary
@@ -427,7 +517,8 @@ public class AnalizSint
 			 ExpressionUnary();
 		 else if ((TokenActual.Token.compareTo("<Idetificador>")==0) || (TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0)|| (TokenActual.Token.compareTo("<this>")==0)|| (TokenActual.Token.compareTo("<.>")==0)||(TokenActual.Token.compareTo("<(>")==0)|| (TokenActual.Token.compareTo("<new>")==0)||(TokenActual.Token.compareTo("<super>")==0))
 			 	Primary();
-		 	  else throw new Exception("ERROR: Se esperaba un simbolo de expresion unaria o uno primario");
+		 	   else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un simbolo de expresion unaria o uno primario");
+		 	 
 	 }
 	 
 	 
@@ -450,7 +541,7 @@ public class AnalizSint
 	 
 	 
 	 // E6 ::= E7 E6’
-	 private void E6()
+	 private void E6() throws Exception
 	 {
 		E7();
 		E6Prima();
@@ -472,7 +563,7 @@ public class AnalizSint
 	 }
 	 
 	 // E5 ::= E6 E5’
-	 private void E5()
+	 private void E5() throws Exception
 	 {
 		E6();
 		E5Prima();
@@ -513,7 +604,7 @@ public class AnalizSint
 	 
 	 
 	 //  E3 ::= E4 E3’
-	 private void E3()
+	 private void E3() throws Exception
 	 {
 		E4();
 		E3Prima();
@@ -537,7 +628,7 @@ public class AnalizSint
 	 
 	 
 	 //  E2 ::= E3 E2’
-	 private void E2()
+	 private void E2() throws Exception
 	 {
 		E3();
 		E2Prima();
@@ -559,7 +650,7 @@ public class AnalizSint
 	 
 	 
 	// E1 ::= E2 E1’
-	 private void E1()
+	 private void E1() throws Exception
 	 {
 		 E2();
 		 E1Prima();
@@ -568,12 +659,12 @@ public class AnalizSint
 	 
 	 
 	 // Expression ::= E1 <Operador Asignación> Expression | E1
-	 private void Expression()
+	 private void Expression() throws Exception
 	 {
 		 E1();
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
-		 if ((TokenActual.Token.compareTo("<Operador Asignación>")==0)
+		 if (TokenActual.Token.compareTo("<Operador Asignación>")==0)
 			{
 			 	TokenActual = null;
 			 	Expression();
