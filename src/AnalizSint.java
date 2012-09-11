@@ -31,7 +31,7 @@ public class AnalizSint
 						// Estado Aceptador.
 						TokenActual = null;
 					}
-				else throw new Exception("ERROR: Se esperaba un identificador");
+				else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 			}
 	 }
 	 
@@ -72,6 +72,7 @@ public class AnalizSint
 				TokenActual = Lex.GetToken();
 		 if ((TokenActual.Token.compareTo("<,>") == 0))
 		 {
+			 TokenActual = null;
 			 FormalArgList();
 		 }
 		 // Sino FormalArgListCont ::= <vacio>
@@ -155,7 +156,7 @@ public class AnalizSint
 			 TokenActual = null;
 			 // Estado Aceptador
 	 		}
-	 	  else throw new Exception("ERROR: Se esperaba un un tipo primitivo o void");
+	 	  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un un tipo primitivo o void");
 		 
 	 }
 	 
@@ -180,9 +181,9 @@ public class AnalizSint
 				 TokenActual = null;
 				 // Estado Aceptador.
 			 	}
-			 else throw new Exception("ERROR: Se esperaba un ;");
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
 		 	}
-		 else throw new Exception("ERROR: Se esperaba un identificador");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 	 }
 	 
 	 
@@ -242,8 +243,11 @@ public class AnalizSint
 			 if (TokenActual == null)  
 					TokenActual = Lex.GetToken();
 			 if (TokenActual.Token.compareTo("<;>") == 0)
+			 	{
+				 TokenActual = null;
 				 PreAnalisis_CtorClassDef_MethodClassDef();
-		 	 else throw new Exception("ERROR: Se esperaba un ;");
+			 	}
+		 	 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
 		 }
 		 // Sino  ListaCtorClassDefSinID :== <vacio>
 	 }
@@ -264,10 +268,13 @@ public class AnalizSint
 			 		if (TokenActual == null)  
 						TokenActual = Lex.GetToken();
 			 		if (TokenActual.Token.compareTo("<;>") == 0)
-			 			ListaMethodClassDef();
-			 		else throw new Exception("ERROR: Se esperaba un ;");
+			 			{	
+			 				TokenActual = null;
+			 				ListaMethodClassDef();
+			 			}
+			 		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
 		 		 }
-		 	  else throw new Exception("ERROR: Se esperaba un ( para definir pametros formales o un identificador para los metodos de clase");
+		 	  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ( para definir pametros formales o un identificador para los metodos de clase");
 	 }
 	 
 	 // PrimitiveType ::= boolean | char | int | String
@@ -298,7 +305,7 @@ public class AnalizSint
 			 		TokenActual = null;
 			 		// Estado Aceptador
 		 		}
-		 	  else throw new Exception("ERROR: Se esperaba un tipo primitivo o void");
+		 	  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un tipo primitivo o void");
 	 }	
 	 
 	 
@@ -321,9 +328,9 @@ public class AnalizSint
 				 	  TokenActual = null;		
 				 	  // Estado Aceptador.
 		 			}
-			 else throw new Exception("ERROR: Se esperaba un ;");
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un ;");
 			}
-		 else throw new Exception("ERROR: Se esperaba un identificador");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 	 }
 	 
 	 
@@ -395,18 +402,222 @@ public class AnalizSint
 				 				TokenActual = null;
 				 				// Estado Aceptador.
 				 			}
-				 		else throw new Exception("ERROR: Se esperaba una } ");
+				 		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una } ");
 				 	  }
-				 	 else throw new Exception("ERROR: Se esperaba una { ");
+				 	 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba una { ");
 			 	}
-			 else throw new Exception("ERROR: Se esperaba un identificador");
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
 			}
-		 else throw new Exception("ERROR: Se esperaba por lo menos un classDef");
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba por lo menos un classDef");
+	 }
+	 
+	 // ExprListCont::= <,> ExprList | <vacio>
+	 private void ExprListCont() throws Exception
+	 {
+		if (TokenActual == null)  
+			TokenActual = Lex.GetToken();
+		if (TokenActual.Token.compareTo("<,>")==0)
+			{
+			ExprList();
+			}
+		// Sino  ExprListCont::= <vacio>
+	 }
+	 
+	 
+	 // ExprList ::= Expression ExprListCont
+	 private void ExprList() throws Exception
+	 {
+		 Expression();
+		 ExprListCont();
+	 }
+	 
+	 
+	 // ExprListOpcional ::= ExprList | <vacio>
+	 private void ExprListOpcional() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<!>")==0) || (TokenActual.Token.compareTo("<Suma>")==0) || (TokenActual.Token.compareTo("<Resta>")==0) || (TokenActual.Token.compareTo("<Idetificador>")==0) || (TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0)|| (TokenActual.Token.compareTo("<this>")==0)|| (TokenActual.Token.compareTo("<.>")==0)||(TokenActual.Token.compareTo("<(>")==0)|| (TokenActual.Token.compareTo("<new>")==0)||(TokenActual.Token.compareTo("<super>")==0))
+		 	{
+			  ExprList();
+		 	}
+		 // Sino ExprListOpcional ::= <vacio>
+	 }
+	 
+	 
+	 // ActualArgs ::= <(> ExprListOpcional <)>
+	 private void ActualArgs() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<(>")==0)
+	 		{
+			 TokenActual = null;
+			 ExprListOpcional();
+			 if (TokenActual == null)  
+					TokenActual = Lex.GetToken();
+			 if (TokenActual.Token.compareTo("<)>")==0)
+			 	{
+				 TokenActual = null;
+				 // Estado Aceptador.
+			 	}
+			 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )"); 
+	 		}
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un (");
+	 }
+	 
+	 
+	 // Literal ::= <null> | <true> | <false> | <Numero_Entero> | <Carácter> | <Cadena Caracteres> 
+	 private void Literal() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0))
+		 	{
+			 TokenActual = null;
+			 // Estado Aceptador. 
+		 	}
+		 else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un literal");
+	 }
+	 
+	 
+	 // NewExpr’ ::=  <.> <Identificador> ActualArgs NewExpr’ | <vacio>
+	 private void NewExprPrima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<.>")==0) 
+			{
+			  TokenActual = Lex.GetToken();
+			  if (TokenActual.Token.compareTo("<Identificador>")==0)
+			 	{
+			       ActualArgs();
+			 	   NewExprPrima();
+			 	}
+			  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
+			}
+		 // Sino NewExp’ ::=  <vacio>
+		 
+		 
 	 }
 	 
 	 
 	 
-	 // NewExpr ::= Literal
+	 // NewExpr‘’ ::= ActualArgs | <.> <Identificador> ActualArgs NewExp’
+	 private void NewExpr2Prima() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<.>")==0) 
+			{
+			  TokenActual = Lex.GetToken();
+			  if (TokenActual.Token.compareTo("<Identificador>")==0)
+			 	{
+			       ActualArgs();
+			 	   NewExprPrima();
+			 	}
+			  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
+			 }
+		 else if (TokenActual.Token.compareTo("<(>")==0)
+		 		{
+			 	  ActualArgs();
+		 		}
+		 	  else  throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un . o (");
+	 }
+	 
+	 
+	 // NewExprCont ::= <.> <Identificador> | <vacio>
+	 private void NewExprCont() throws Exception
+	 {
+		 if (TokenActual == null)  
+			TokenActual = Lex.GetToken();
+		 if (TokenActual.Token.compareTo("<.>")==0) 
+				 {
+			 		TokenActual = Lex.GetToken();
+			 		if (TokenActual.Token.compareTo("<Identificador>")==0)
+			 				{
+			 					TokenActual = null;
+			 					// Estado Aceptador.
+			 				}
+			 		else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
+				 }
+		 // Sino NewExprCont ::= <vacio>
+	 }
+	 
+	 
+	 // NewExpr ::= Literal | <this> NewExprCont | <.> <Identificador> | <vacio> | <(> Expression <)> | <new> <Identificador> ActualArgs | <Identificador> NewExpr‘’ | <super> <.> <Identificador> ActualArgs
+	 private void NewExpr() throws Exception
+	 {
+		 if (TokenActual == null)  
+				TokenActual = Lex.GetToken();
+		 if ((TokenActual.Token.compareTo("<null>")==0) || (TokenActual.Token.compareTo("<true>")==0)|| (TokenActual.Token.compareTo("<false>")==0)|| (TokenActual.Token.compareTo("<Numero_Entero>")==0)|| (TokenActual.Token.compareTo("<Carácter>")==0)|| (TokenActual.Token.compareTo("<Cadena Caracteres>")==0))  
+			 Literal();
+		 else if (TokenActual.Token.compareTo("<this>")==0)
+		 		{	
+			 		TokenActual = null;
+			 		NewExprCont();
+		 		}
+		 	  else if (TokenActual.Token.compareTo("<.>")==0)
+		 	  			{
+		 		  			TokenActual = Lex.GetToken();
+		 		  			if (TokenActual.Token.compareTo("<Identificador>")==0)
+		 		  			{	
+		 		  				TokenActual = null;
+		 		  				// Estado Aceptador.
+		 		  			}
+		 		  			throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un identificador");
+		 	  			}
+		 	  		else //  <(> Expression <)>
+		 	  			 if (TokenActual.Token.compareTo("<(>")==0)
+		 	  			 	{
+		 	  				  TokenActual = null;
+		 	  				  Expression();
+		 	  				  if (TokenActual == null)  
+		 	  					  TokenActual = Lex.GetToken();
+		 	  				  if (TokenActual.Token.compareTo("<)>")==0)
+		 	  				  	 {	
+		 	  					  	TokenActual = null;
+		 	  					  	// 	Estado Aceptador.
+		 	  				  	 }
+		 	  				  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un )");
+		 	  			 	}
+		 	  			 else // <new> <Identificador> ActualArgs
+		 	  				if (TokenActual.Token.compareTo("<new>")==0)
+		 	  			 		{
+		 	  					  TokenActual = Lex.GetToken();
+		 	  					  if (TokenActual.Token.compareTo("<Identificador>")==0)
+		 	  						  ActualArgs();	
+		 	  					  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un Identificador");
+		 	  			 		}
+		 	  				else	// <Identificador> NewExpr‘’ 
+		 	  					if (TokenActual.Token.compareTo("<Identificador>")==0)
+		 	  						{
+		 	  							TokenActual = null;
+		 	  							NewExpr2Prima();
+		 	  						}
+		 	  					else // <super> <.> <Identificador> ActualArgs
+		 	  						if (TokenActual.Token.compareTo("<super>")==0)
+			 	  			 		  {
+			 	  					    TokenActual = Lex.GetToken();
+			 	  					    if (TokenActual.Token.compareTo("<.>")==0)
+			 	  					       {
+			 	  					    	  TokenActual = Lex.GetToken();
+			 	  					    	  if (TokenActual.Token.compareTo("<Identificador>")==0)
+			 	  					    		  {
+			 	  					    		  	TokenActual = null;
+			 	  					    		  	ActualArgs();	
+			 	  					    		  }
+			 	  					    	  else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un Identificador");
+			 	  					       
+			 	  					       }
+			 	  					    else throw new Exception("Linea " + TokenActual.Linea + " Columna " + TokenActual.Columna+ ": ERROR: Se esperaba un .");
+			 	  			 		  }
+	 }
+	 
+	 
+	 
+	 
+ 
 	 
 	 
 	 // ExpressionUnary :: = UnaryOp Expression
