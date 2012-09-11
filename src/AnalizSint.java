@@ -739,7 +739,7 @@ public class AnalizSint
 	 {
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
-		 if ((TokenActual.Token.compareTo("<*>") == 0)|| (TokenActual.Token.compareTo("</>") == 0)||(TokenActual.Token.compareTo("<Modulo>") == 0))
+		 if ((TokenActual.Token.compareTo("<Multiplicacion>") == 0)|| (TokenActual.Token.compareTo("</>") == 0)||(TokenActual.Token.compareTo("<Modulo>") == 0))
 		 	{
 			 BinaryOpPrecedence1();
 			 E7(); 
@@ -764,7 +764,7 @@ public class AnalizSint
 	 {
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
-		 if ((TokenActual.Token.compareTo("<+>") == 0)|| (TokenActual.Token.compareTo("<->") == 0))
+		 if ((TokenActual.Token.compareTo("<Suma>") == 0)|| (TokenActual.Token.compareTo("<Resta>") == 0))
 		 	{
 			 BinaryOpPrecedence2();
 			 E6(); 
@@ -804,7 +804,7 @@ public class AnalizSint
 	 {
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
-		 if ((TokenActual.Token.compareTo("<==>") == 0)|| (TokenActual.Token.compareTo("<!=>") == 0))
+		 if ((TokenActual.Token.compareTo("<Operador Igualdad>") == 0)|| (TokenActual.Token.compareTo("<!=>") == 0))
 		 	{
 			 BinaryOpPrecedence4();
 			 E4(); 
@@ -875,7 +875,8 @@ public class AnalizSint
 		 E1();
 		 if (TokenActual == null)  
 				TokenActual = Lex.GetToken();
-		 if (TokenActual.Token.compareTo("<Operador Asignación>")==0)
+
+		 if (TokenActual.Token.compareTo("<Operador asignacion>")==0)
 			{
 			 	TokenActual = null;
 			 	Expression();
